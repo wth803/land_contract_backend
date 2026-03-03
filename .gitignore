@@ -1,0 +1,17 @@
+# Python 编译缓存
+__pycache__/
+*.py[cod]
+*.pyo
+
+# 虚拟环境
+.venv/
+venv/
+env/
+
+# 环境变量（含敏感信息）
+.env
+
+# 编辑器/IDE
+.idea/
+.vscode/
+*.swp
