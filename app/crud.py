@@ -48,6 +48,22 @@ def search_contracts(
     return total, items
 
 
+def get_all_contracts(
+    db: Session,
+    name: Optional[str] = None,
+    land_location: Optional[str] = None,
+):
+    """
+    获取所有匹配的土地承包明细（不分页，用于导出），支持可选的模糊搜索条件
+    """
+    query = db.query(models.Contract)
+    if name:
+        query = query.filter(models.Contract.name.ilike(f"%{name}%"))
+    if land_location:
+        query = query.filter(models.Contract.land_location.ilike(f"%{land_location}%"))
+    return query.order_by(models.Contract.created_at.desc()).all()
+
+
 def get_contract(db: Session, contract_id: int) -> Optional[models.Contract]:
     """根据 ID 获取单条土地承包明细"""
     return db.query(models.Contract).filter(models.Contract.id == contract_id).first()
