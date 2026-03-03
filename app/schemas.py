@@ -15,6 +15,10 @@ class ContractBase(BaseModel):
     phone: str
     area: float
     year: int
+    village: str
+    bank_account: Optional[str] = None
+    contractor_code: str
+    plot_code: str
     remark: Optional[str] = None
 
     @field_validator("name")
@@ -66,6 +70,47 @@ class ContractBase(BaseModel):
             raise ValueError("承包年份必须在 1949 ~ 2100 之间")
         return v
 
+    @field_validator("village")
+    @classmethod
+    def village_not_empty(cls, v: str) -> str:
+        """村别不能为空，最多50个字符"""
+        if not v or not v.strip():
+            raise ValueError("村别不能为空")
+        if len(v.strip()) > 50:
+            raise ValueError("村别最多50个字符")
+        return v.strip()
+
+    @field_validator("bank_account")
+    @classmethod
+    def validate_bank_account(cls, v: Optional[str]) -> Optional[str]:
+        """银行卡号可选，长度在10-25位之间"""
+        if v is not None and v.strip():
+            stripped = v.strip()
+            if not (10 <= len(stripped) <= 25):
+                raise ValueError("银行卡号长度应在10到25位之间")
+            return stripped
+        return v
+
+    @field_validator("contractor_code")
+    @classmethod
+    def contractor_code_not_empty(cls, v: str) -> str:
+        """承包方编码不能为空，最多30个字符"""
+        if not v or not v.strip():
+            raise ValueError("承包方编码不能为空")
+        if len(v.strip()) > 30:
+            raise ValueError("承包方编码最多30个字符")
+        return v.strip()
+
+    @field_validator("plot_code")
+    @classmethod
+    def plot_code_not_empty(cls, v: str) -> str:
+        """地块编码不能为空，最多30个字符"""
+        if not v or not v.strip():
+            raise ValueError("地块编码不能为空")
+        if len(v.strip()) > 30:
+            raise ValueError("地块编码最多30个字符")
+        return v.strip()
+
 
 class ContractCreate(ContractBase):
     """创建土地承包明细的请求模型"""
@@ -81,6 +126,10 @@ class ContractUpdate(BaseModel):
     phone: Optional[str] = None
     area: Optional[float] = None
     year: Optional[int] = None
+    village: Optional[str] = None
+    bank_account: Optional[str] = None
+    contractor_code: Optional[str] = None
+    plot_code: Optional[str] = None
     remark: Optional[str] = None
 
     @field_validator("name")
@@ -128,6 +177,43 @@ class ContractUpdate(BaseModel):
             raise ValueError("承包年份必须在 1949 ~ 2100 之间")
         return v
 
+    @field_validator("village")
+    @classmethod
+    def village_not_empty(cls, v: Optional[str]) -> Optional[str]:
+        if v is not None and not v.strip():
+            raise ValueError("村别不能为空")
+        if v is not None and len(v.strip()) > 50:
+            raise ValueError("村别最多50个字符")
+        return v.strip() if v is not None else None
+
+    @field_validator("bank_account")
+    @classmethod
+    def validate_bank_account(cls, v: Optional[str]) -> Optional[str]:
+        if v is not None and v.strip():
+            stripped = v.strip()
+            if not (10 <= len(stripped) <= 25):
+                raise ValueError("银行卡号长度应在10到25位之间")
+            return stripped
+        return v
+
+    @field_validator("contractor_code")
+    @classmethod
+    def contractor_code_not_empty(cls, v: Optional[str]) -> Optional[str]:
+        if v is not None and not v.strip():
+            raise ValueError("承包方编码不能为空")
+        if v is not None and len(v.strip()) > 30:
+            raise ValueError("承包方编码最多30个字符")
+        return v.strip() if v is not None else None
+
+    @field_validator("plot_code")
+    @classmethod
+    def plot_code_not_empty(cls, v: Optional[str]) -> Optional[str]:
+        if v is not None and not v.strip():
+            raise ValueError("地块编码不能为空")
+        if v is not None and len(v.strip()) > 30:
+            raise ValueError("地块编码最多30个字符")
+        return v.strip() if v is not None else None
+
 
 class ContractResponse(ContractBase):
     """土地承包明细响应模型（含数据库自动生成字段）"""
@@ -152,6 +238,7 @@ class PaginatedResponse(BaseModel):
 # 合法的可导出字段名
 EXPORTABLE_FIELDS = {
     "name", "id_card", "phone", "land_location", "area", "year", "remark",
+    "village", "bank_account", "contractor_code", "plot_code",
     "created_at", "updated_at",
 }
 

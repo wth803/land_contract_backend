@@ -24,6 +24,14 @@ class Contract(Base):
     area = Column(Float, nullable=False)
     # 承包年份
     year = Column(Integer, nullable=False)
+    # 村别，不能为空
+    village = Column(String(50), nullable=False)
+    # 银行卡号，可选
+    bank_account = Column(String(25), nullable=True)
+    # 承包方编码，不能为空
+    contractor_code = Column(String(30), nullable=False)
+    # 地块编码，不能为空
+    plot_code = Column(String(30), nullable=False)
     # 备注，可选
     remark = Column(Text, nullable=True)
     # 创建时间，自动生成
