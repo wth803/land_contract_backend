@@ -14,6 +14,10 @@ CREATE TABLE IF NOT EXISTS contracts (
     year        INTEGER      NOT NULL
                     CHECK (year >= 1949 AND year <= 2100),  -- 承包年份
     remark      TEXT,                                       -- 备注（可选）
+    village     VARCHAR(50)  NOT NULL,                      -- 村别
+    bank_account VARCHAR(25),                               -- 银行卡号（可选）
+    contractor_code VARCHAR(30) NOT NULL,                   -- 承包方编码
+    plot_code   VARCHAR(30)  NOT NULL,                      -- 地块编码
     created_at  TIMESTAMP    NOT NULL DEFAULT NOW(),        -- 创建时间
     updated_at  TIMESTAMP    NOT NULL DEFAULT NOW()         -- 更新时间
 );
@@ -53,6 +57,10 @@ COMMENT ON COLUMN contracts.phone IS '联系电话（11位纯数字）';
 COMMENT ON COLUMN contracts.area IS '承包面积（亩）';
 COMMENT ON COLUMN contracts.year IS '承包年份（1949~2100）';
 COMMENT ON COLUMN contracts.remark IS '备注';
+COMMENT ON COLUMN contracts.village IS '村别';
+COMMENT ON COLUMN contracts.bank_account IS '银行卡号（可选）';
+COMMENT ON COLUMN contracts.contractor_code IS '承包方编码';
+COMMENT ON COLUMN contracts.plot_code IS '地块编码';
 COMMENT ON COLUMN contracts.created_at IS '创建时间';
 COMMENT ON COLUMN contracts.updated_at IS '最后更新时间';
 
