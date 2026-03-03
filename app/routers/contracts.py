@@ -10,7 +10,8 @@ from fastapi.responses import StreamingResponse
 from openpyxl.styles import Alignment, Font, PatternFill
 from sqlalchemy.orm import Session
 
-from app import crud, schemas
+from app import crud, models, schemas
+from app.auth import get_current_user
 from app.database import get_db
 
 router = APIRouter(prefix="/api/contracts", tags=["土地承包明细"])
@@ -21,6 +22,7 @@ def list_contracts(
     page: int = Query(1, ge=1, description="页码，从1开始"),
     page_size: int = Query(10, ge=1, le=100, description="每页条数"),
     db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
 ):
     """获取土地承包明细列表，支持分页，按创建时间倒序排列"""
     total, items = crud.get_contracts(db, page=page, page_size=page_size)
@@ -36,6 +38,7 @@ def search_contracts(
     page: int = Query(1, ge=1, description="页码，从1开始"),
     page_size: int = Query(10, ge=1, le=100, description="每页条数"),
     db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
 ):
     """通过承包人姓名和地块位置进行模糊搜索，支持分页"""
     total, items = crud.search_contracts(
@@ -51,7 +54,11 @@ def search_contracts(
     summary="导出土地承包明细到 Excel",
     response_class=StreamingResponse,
 )
-def export_contracts(export_req: schemas.ExportRequest, db: Session = Depends(get_db)):
+def export_contracts(
+    export_req: schemas.ExportRequest,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
     """
     根据所选列和搜索条件导出土地承包明细为 Excel 文件
     """
@@ -140,14 +147,21 @@ def export_contracts(export_req: schemas.ExportRequest, db: Session = Depends(ge
     status_code=201,
     summary="创建土地承包明细",
 )
-def create_contract(contract: schemas.ContractCreate, db: Session = Depends(get_db)):
+def create_contract(
+    contract: schemas.ContractCreate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
     """创建新的土地承包明细记录"""
     return crud.create_contract(db, contract)
 
 
 @router.put("/{contract_id}", response_model=schemas.ContractResponse, summary="更新土地承包明细")
 def update_contract(
-    contract_id: int, contract: schemas.ContractUpdate, db: Session = Depends(get_db)
+    contract_id: int,
+    contract: schemas.ContractUpdate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
 ):
     """更新指定 ID 的土地承包明细（支持部分字段更新）"""
     db_contract = crud.update_contract(db, contract_id, contract)
@@ -157,7 +171,11 @@ def update_contract(
 
 
 @router.delete("/{contract_id}", summary="删除土地承包明细")
-def delete_contract(contract_id: int, db: Session = Depends(get_db)):
+def delete_contract(
+    contract_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
     """删除指定 ID 的土地承包明细"""
     success = crud.delete_contract(db, contract_id)
     if not success:

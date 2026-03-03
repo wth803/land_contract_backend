@@ -55,3 +55,23 @@ COMMENT ON COLUMN contracts.year IS '承包年份（1949~2100）';
 COMMENT ON COLUMN contracts.remark IS '备注';
 COMMENT ON COLUMN contracts.created_at IS '创建时间';
 COMMENT ON COLUMN contracts.updated_at IS '最后更新时间';
+
+-- 用户表
+CREATE TABLE IF NOT EXISTS users (
+    id               SERIAL PRIMARY KEY,                     -- 主键，自增
+    username         VARCHAR(50) NOT NULL UNIQUE,            -- 用户名，唯一
+    hashed_password  TEXT        NOT NULL,                   -- 哈希后的密码
+    is_active        BOOLEAN     NOT NULL DEFAULT TRUE,      -- 是否激活
+    created_at       TIMESTAMP   NOT NULL DEFAULT NOW()      -- 创建时间
+);
+
+-- 用户名索引
+CREATE INDEX IF NOT EXISTS idx_users_username ON users (username);
+
+-- 表注释
+COMMENT ON TABLE users IS '用户表';
+COMMENT ON COLUMN users.id IS '主键，自增';
+COMMENT ON COLUMN users.username IS '用户名';
+COMMENT ON COLUMN users.hashed_password IS '哈希后的密码';
+COMMENT ON COLUMN users.is_active IS '是否激活';
+COMMENT ON COLUMN users.created_at IS '创建时间';
