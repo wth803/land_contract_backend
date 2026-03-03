@@ -18,14 +18,19 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 bearer_scheme = HTTPBearer()
 
 
+def _truncate_password(password: str) -> str:
+    """将密码按 UTF-8 字节截断到 72 字节（bcrypt 算法限制）"""
+    return password.encode("utf-8")[:72].decode("utf-8", errors="ignore")
+
+
 def hash_password(password: str) -> str:
-    """使用 bcrypt 对明文密码进行哈希"""
-    return pwd_context.hash(password)
+    """使用 bcrypt 对明文密码进行哈希（自动截断超过 72 字节的部分）"""
+    return pwd_context.hash(_truncate_password(password))
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    """验证明文密码与哈希密码是否匹配"""
-    return pwd_context.verify(plain_password, hashed_password)
+    """验证明文密码与哈希密码是否匹配（同样截断以保持一致）"""
+    return pwd_context.verify(_truncate_password(plain_password), hashed_password)
 
 
 def create_access_token(data: dict) -> str:
