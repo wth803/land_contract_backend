@@ -19,13 +19,15 @@ bearer_scheme = HTTPBearer()
 
 
 def hash_password(password: str) -> str:
-    """使用 bcrypt 对明文密码进行哈希"""
-    return pwd_context.hash(password)
+    """使用 bcrypt 对明文密码进行哈希（自动截断超过 72 字节的部分）"""
+    truncated = password.encode("utf-8")[:72].decode("utf-8", errors="ignore")
+    return pwd_context.hash(truncated)
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    """验证明文密码与哈希密码是否匹配"""
-    return pwd_context.verify(plain_password, hashed_password)
+    """验证明文密码与哈希密码是否匹配（同样截断以保持一致）"""
+    truncated = plain_password.encode("utf-8")[:72].decode("utf-8", errors="ignore")
+    return pwd_context.verify(truncated, hashed_password)
 
 
 def create_access_token(data: dict) -> str:
