@@ -5,9 +5,11 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from sqlalchemy.orm import Session
 
-from app.database import Base, engine
+from app.database import Base, SessionLocal, engine
 from app.routers import contracts
+from app.routers import auth
 
 # 配置日志
 logging.basicConfig(level=logging.INFO)
@@ -16,9 +18,28 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """应用生命周期管理：启动时自动创建数据库表"""
+    """应用生命周期管理：启动时自动创建数据库表，并初始化默认管理员账户"""
     Base.metadata.create_all(bind=engine)
     logger.info("数据库表已就绪")
+
+    # 检查是否存在用户，若不存在则创建默认管理员
+    from app.auth import hash_password
+    from app.models import User
+
+    db: Session = SessionLocal()
+    try:
+        if db.query(User).count() == 0:
+            admin = User(
+                username="admin",
+                hashed_password=hash_password("admin123"),
+                is_active=True,
+            )
+            db.add(admin)
+            db.commit()
+            logger.info("已创建默认管理员账户：用户名 admin，密码 admin123，请及时修改密码")
+    finally:
+        db.close()
+
     yield
 
 
@@ -52,6 +73,7 @@ async def global_exception_handler(request: Request, exc: Exception):
 
 
 # 注册路由
+app.include_router(auth.router)
 app.include_router(contracts.router)
 
 
