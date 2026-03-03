@@ -1,5 +1,5 @@
 # SQLAlchemy ORM 数据模型
-from sqlalchemy import Column, DateTime, Float, Integer, String, Text
+from sqlalchemy import Boolean, Column, DateTime, Float, Integer, String, Text
 from sqlalchemy.sql import func
 
 from app.database import Base
@@ -35,3 +35,20 @@ class Contract(Base):
         onupdate=func.now(),
         nullable=False,
     )
+
+
+class User(Base):
+    """用户数据表模型"""
+
+    __tablename__ = "users"
+
+    # 主键，自增整数
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    # 用户名，唯一，不能为空
+    username = Column(String(50), unique=True, nullable=False, index=True)
+    # 哈希后的密码，不能为空
+    hashed_password = Column(Text, nullable=False)
+    # 是否激活，默认 True
+    is_active = Column(Boolean, default=True, nullable=False)
+    # 创建时间，自动生成
+    created_at = Column(DateTime, server_default=func.now(), nullable=False)
