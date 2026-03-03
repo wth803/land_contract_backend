@@ -186,7 +186,7 @@ class LoginRequest(BaseModel):
     def password_max_length(cls, v: str) -> str:
         """密码长度不能超过 72 字节（bcrypt 算法限制）"""
         if len(v.encode("utf-8")) > 72:
-            raise ValueError("密码长度不能超过 72 个字符")
+            raise ValueError("密码长度不能超过 72 字节")
         return v
 
 
