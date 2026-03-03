@@ -1,7 +1,7 @@
 # Pydantic 请求/响应模型，含字段验证
 import re
 from datetime import datetime
-from typing import Optional
+from typing import List, Optional
 
 from pydantic import BaseModel, field_validator, model_validator
 
@@ -147,3 +147,29 @@ class PaginatedResponse(BaseModel):
     page: int
     page_size: int
     items: list[ContractResponse]
+
+
+# 合法的可导出字段名
+EXPORTABLE_FIELDS = {
+    "name", "id_card", "phone", "land_location", "area", "year", "remark",
+    "created_at", "updated_at",
+}
+
+
+class ExportRequest(BaseModel):
+    """导出请求模型"""
+
+    columns: List[str]  # 要导出的列
+    search_name: Optional[str] = None  # 搜索条件：姓名
+    search_land_location: Optional[str] = None  # 搜索条件：地块位置
+
+    @field_validator("columns")
+    @classmethod
+    def columns_not_empty(cls, v: List[str]) -> List[str]:
+        """columns 不能为空，且每个列名必须是合法字段名"""
+        if not v:
+            raise ValueError("columns 不能为空列表，请至少选择一列")
+        invalid = [col for col in v if col not in EXPORTABLE_FIELDS]
+        if invalid:
+            raise ValueError(f"以下列名不合法：{invalid}，合法列名为：{sorted(EXPORTABLE_FIELDS)}")
+        return v
